@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Examples</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <style>
+    canvas {
+        border: 0px solid red;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas width="300" height="200" id="trend" style="border:1px solid red;"></canvas>
+    <script>
+    var canvas = document.getElementById('trend'),
+        ctx = canvas.getContext('2d'),
+        imageData = ctx.createImageData(canvas.width, canvas.height),
+        fillColor = "#53b8d5",
+        fontColor = "#ffffff",
+        PI = Math.PI * 2,
+        r = 10, // 圆点半径 
+        d = 70; // 圆点之间的距离
+
+    var getPos = function (data) {
+    	var p = []
+    	for (var i = 0, len = data.length; i < len; i++) {
+    		p.push({
+    			x: r + d * i,
+    			y: canvas.height - data[i] * 2
+    		});
+    	}
+    	return p;
+    };
+
+    var drawPointer = function (ctx, p, score) {
+	    ctx.fillStyle = fillColor;
+	    ctx.beginPath();
+	    ctx.arc(p.x, p.y, r, 0, PI, true); //Math.PI*2是JS计算方法，是圆
+	    ctx.closePath();
+	    ctx.fill();
+
+	    ctx.font = "10px Georgia";
+	    ctx.fillStyle = fontColor;
+	    ctx.fillText(score, p.x - 7, p.y + 3);
+    };
+
+    var setPixel = function (imageData, x, y, r, g, b, a) { // 使用像素点画线
+        var index = (parseInt(x) + parseInt(y) * imageData.width) * 4;
+
+        imageData.data[index + 0] = r;
+        imageData.data[index + 1] = g;
+        imageData.data[index + 2] = b;
+        imageData.data[index + 3] = a;
+    }
+
+    var set = function (ctx, x, y) {  //使用极短线条模拟点画线
+        ctx.strokeStyle = fillColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 1, y + 1);
+        ctx.stroke();
+    }
+
+    var LagrangeInterpolation = function (x, val) { // 拉格朗日插值定理 拟合曲线
+        var y = 0;
+        for (var i = 0; i < 5; i++) {
+            var p = 1;
+            for (var j = 0; j < 5; j++) {
+                if (i == j)
+                    continue;
+                p = p * (x - val[j].x) / (val[i].x - val[j].x);
+            }
+            y = y + p * val[i].y;
+        }
+        return y;
+    }
+
+    var score = [45, 30, 50, 40, 70];
+  	var position = getPos(score);
+
+    // x:10~290
+    for (var i = r, len = canvas.width - r; i < len; i++) {
+        var y = LagrangeInterpolation(i, position);
+        
+        set(ctx, i, y); //setPixel(imageData, i, y, 0, 0, 0, 255)
+    }
+    //ctx.putImageData(imageData, 0, 0);
+
+
+    for (var j = 0, len = score.length; j < len; j++) {
+    	drawPointer(ctx, position[j], score[j]);
+    }
+
+    </script>
+</body>
+
+</html>
