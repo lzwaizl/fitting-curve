@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Examples</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <style>
+    canvas {
+        display: block;
+        border: 1px solid #ccc;
+        margin: 0 auto;
+        margin-top: 200px;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas width="500" height="400" id="trend"></canvas>
+    <script>
+    var canvas = document.getElementById('trend'),
+        ctx = canvas.getContext('2d'),
+        imageData = ctx.createImageData(canvas.width, canvas.height),
+        fillColor = "#53b8d5",
+        fontColor = "#000",
+        lineColoe = "#ccc",
+        PI = Math.PI * 2,
+        r = 2, // 圆点半径 
+        count = 5;
+
+    var getPos = function () {
+    	var p = [];
+    	for (var i = 0 ; i < count; i++) {
+    		p.push({
+    			x: Math.round(Math.random()*500),
+    			y: Math.round(Math.random()*400)
+    		});
+    	}
+    	return p;
+    };
+
+    var drawPointer = function (i, ctx, p) {
+	    ctx.fillStyle = fillColor;
+	    ctx.beginPath();
+	    ctx.arc(p.x, p.y, r, 0, PI, true); //Math.PI*2是JS计算方法，是圆
+	    ctx.closePath();
+	    ctx.fill();
+
+        ctx.font = "10px Georgia";
+        ctx.fillStyle = fontColor;
+        ctx.fillText(i, p.x - 15, p.y);
+    };
+
+    var setPixel = function (imageData, x, y, r, g, b, a) { // 使用像素点画线
+        var index = (parseInt(x) + parseInt(y) * imageData.width) * 4;
+
+        imageData.data[index + 0] = r;
+        imageData.data[index + 1] = g;
+        imageData.data[index + 2] = b;
+        imageData.data[index + 3] = a;
+    }
+
+    var set = function (ctx, x, y) {  //使用极短线条模拟点画线
+        ctx.strokeStyle = fillColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 1, y + 1);
+        ctx.stroke();
+    }
+
+    var subDivide = function (handles, subdivs) {
+            if (handles.length) {
+                do {
+                    var numHandles = handles.length;
+
+                    // 第一个点
+                    handles.push({
+                        x: handles[0].x, 
+                        y: handles[0].y
+                    });
+     
+                    for (var i = 0; i < numHandles - 1; ++i) {
+                        // 每次拿出两个点
+                        var p0 = handles[i];
+                        var p1 = handles[i + 1];
+
+                        // 根据两个原始点创建两个新点，做插值
+                        var Q = { 
+                                    x: 0.75 * p0.x + 0.25 * p1.x, 
+                                    y: 0.75 * p0.y + 0.25 * p1.y
+                                };
+                        var R = { 
+                                    x: 0.25 * p0.x + 0.75 * p1.x,
+                                    y: 0.25 * p0.y + 0.75 * p1.y
+                                };
+         
+                        handles.push(Q);
+                        handles.push(R);
+                    }
+                    // 最后一个点
+                    handles.push({ 
+                        x: handles[numHandles - 1].x,
+                        y: handles[numHandles - 1].y
+                    });
+     
+                    // 更新数组
+                    for (var i = 0; i < numHandles; ++i)
+                        handles.shift();
+                    //handles.shift(numHandles);
+                } while (--subdivs > 0);
+            }
+            return handles;
+    };
+
+
+
+
+  	var position = getPos();
+    position.push(position[0])
+    for (var i = 0; i < count; i++) {
+    	drawPointer(i, ctx, position[i]);
+
+        if (position[i + 1]) {
+            ctx.strokeStyle = lineColoe;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(position[i].x, position[i].y);
+            ctx.lineTo(position[i + 1].x, position[i + 1].y);
+            ctx.stroke();
+        }
+    }
+
+
+    subDivide(position, 6);
+    j = 0;
+    setTimeout(function(){
+            if (position[j]) {
+                set(ctx, position[j].x, position[j].y);
+                j++;
+            } 
+        setTimeout(arguments.callee, 15);
+    }, 15);
+
+
+
+    </script>
+</body>
+
+</html>

@@ -9,13 +9,16 @@
     <meta name="keywords" content="">
     <style>
     canvas {
-        border: 0px solid red;
+        display: block;
+        border: 1px solid #ccc;
+        margin: 0 auto;
+        margin-top: 200px;
     }
     </style>
 </head>
 
 <body>
-    <canvas width="300" height="200" id="trend" style="border:1px solid red;"></canvas>
+    <canvas width="300" height="200" id="trend"></canvas>
     <script>
     var canvas = document.getElementById('trend'),
         ctx = canvas.getContext('2d'),
@@ -84,13 +87,26 @@
     var score = [45, 30, 50, 40, 70];
   	var position = getPos(score);
 
+
+    // 拉格朗日插值 画法
     // x:10~290
+    var lag = [];
     for (var i = r, len = canvas.width - r; i < len; i++) {
         var y = LagrangeInterpolation(i, position);
-        
-        set(ctx, i, y); //setPixel(imageData, i, y, 0, 0, 0, 255)
+        lag.push({x: i, y: y});
+        //set(ctx, i, y); //setPixel(imageData, i, y, 0, 0, 0, 255)
     }
     //ctx.putImageData(imageData, 0, 0);
+
+
+    j = 0;
+    setTimeout(function(){
+            if (lag[j]) {
+                set(ctx, lag[j].x, lag[j].y);
+                j++;
+            } 
+        setTimeout(arguments.callee, 10);
+    }, 10);
 
 
     for (var j = 0, len = score.length; j < len; j++) {
