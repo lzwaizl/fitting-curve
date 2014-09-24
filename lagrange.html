@@ -72,9 +72,9 @@
 
     var LagrangeInterpolation = function (x, val) { // 拉格朗日插值定理 拟合曲线
         var y = 0;
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < val.length; i++) {
             var p = 1;
-            for (var j = 0; j < 5; j++) {
+            for (var j = 0; j < val.length; j++) {
                 if (i == j)
                     continue;
                 p = p * (x - val[j].x) / (val[i].x - val[j].x);
